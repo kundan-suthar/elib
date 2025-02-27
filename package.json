@@ -1,0 +1,22 @@
+{
+  "name": "elib-project",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+   "dev":"nodemon server.ts"
+  },
+  "keywords": [
+    "rest",
+    "api",
+    "express"
+  ],
+  "author": "Kundan",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "@types/node": "^22.13.5",
+    "nodemon": "^3.1.9",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.7.3"
+  }
+}
