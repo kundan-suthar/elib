@@ -1,6 +1,7 @@
 import express, { NextFunction, Request, Response } from "express";
 import createHttpError from "http-errors";
 import globalErrorHandler from "./middleware/globalErrorHandler";
+import userRouter from "./users/userRouter";
 
 const app = express();
 
@@ -13,6 +14,8 @@ app.get("/", (req: Request, res: Response, next: NextFunction) => {
   res.json({ message: "Welcome to API" });
   // next(); // No need to call next() here unless passing control further
 });
+
+app.use("/api/users", userRouter);
 
 // Global error handler
 app.use(globalErrorHandler);
