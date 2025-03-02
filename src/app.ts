@@ -4,7 +4,7 @@ import globalErrorHandler from "./middleware/globalErrorHandler";
 import userRouter from "./users/userRouter";
 
 const app = express();
-
+app.use(express.json());
 // Routes
 app.get("/", (req: Request, res: Response, next: NextFunction) => {
   // Example of throwing an error (uncomment to test)
