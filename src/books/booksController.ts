@@ -2,8 +2,11 @@ import { NextFunction, Request, Response } from "express";
 import cloudinary from "../config/cloudinary";
 import path from "node:path";
 import createHttpError from "http-errors";
+import bookModel from "./bookModel";
+import fs from "node:fs";
 
 const createBook = async (req: Request, res: Response, next: NextFunction) => {
+  const { title, genre } = req.body;
   console.log("file:", req.files);
   const files = req.files as {
     [fieldName: string]: Express.Multer.File[];
@@ -22,13 +25,6 @@ const createBook = async (req: Request, res: Response, next: NextFunction) => {
       folder: "book-cover",
       format: coverImageMimeType,
     });
-    console.log("uploadResult", uploadResult);
-  } catch (error) {
-    console.log(error);
-    return next(createHttpError(500, "unable to upload to cloudinary"));
-  }
-
-  try {
     const bookFileName = files.file[0].filename;
     const bookFilepathname = path.resolve(
       __dirname,
@@ -44,12 +40,24 @@ const createBook = async (req: Request, res: Response, next: NextFunction) => {
         format: "pdf",
       }
     );
+    const newBook = await bookModel.create({
+      title,
+      genre,
+      author: "67c3fe17b6cacb6cecee437c",
+      coverImage: uploadResult.secure_url,
+      file: fileUploadResult.secure_url,
+    });
+
+    //delete temp file
+    await fs.promises.unlink(filepath);
+    await fs.promises.unlink(bookFilepathname);
+
     console.log("file upload result: ", fileUploadResult);
+    console.log("uploadResult", uploadResult);
+    res.status(201).json({ id: newBook._id });
   } catch (error) {
     console.log(error);
     return next(createHttpError(500, "unable to upload to cloudinary"));
   }
-
-  res.json({});
 };
 export { createBook };
