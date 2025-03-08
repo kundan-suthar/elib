@@ -6,7 +6,7 @@ export interface AuthRequest extends Request {
   userId: string;
 }
 const authenticate = (req: Request, res: Response, next: NextFunction) => {
-  const token = req.header("Authorization");
+  const token = req.header("Authorization") || req.header("authorization");
   if (!token) {
     return next(createHttpError(401, "Access token required"));
   }
