@@ -33,4 +33,5 @@ booksRouter.patch(
 );
 
 booksRouter.get("/", listBooks);
+booksRouter.get("/:bookId");
 export default booksRouter;
