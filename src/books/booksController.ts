@@ -170,4 +170,41 @@ const getSingleBook = async (
     return next(createHttpError(500, "Error while getting book."));
   }
 };
-export { createBook, updateBook, listBooks, getSingleBook };
+const deleteBook = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const bookId = req.params.bookId;
+    const singleBook = await bookModel.findOne({ _id: bookId });
+    if (!singleBook) {
+      return next(createHttpError(404, "book not found."));
+    }
+
+    const _req = req as AuthRequest;
+
+    if (singleBook.author.toString() !== _req.userId) {
+      return next(createHttpError(403, "you cannot delete others book."));
+    }
+    const coverImageSplits = singleBook.coverImage.split("/");
+    const coverImagePublicId =
+      coverImageSplits.at(-2) + "/" + coverImageSplits.at(-1)?.split(".").at(0);
+    //console.log(coverImagePublicId);
+    const filePdfSplit = singleBook.file.split("/");
+
+    const filePublicId = filePdfSplit.at(-2) + "/" + filePdfSplit.at(-1);
+    console.log(filePdfSplit);
+
+    console.log(filePublicId);
+
+    await cloudinary.uploader.destroy(filePublicId, {
+      resource_type: "raw",
+    });
+    await cloudinary.uploader.destroy(coverImagePublicId);
+    await bookModel.deleteOne({ _id: bookId });
+    //res.json({ message: `${bookId} Deleted.` });
+    res.sendStatus(204);
+  } catch (err) {
+    console.log(err);
+    return next(createHttpError(500, "Error while getting book."));
+  }
+};
+
+export { createBook, updateBook, listBooks, getSingleBook, deleteBook };
