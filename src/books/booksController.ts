@@ -5,6 +5,7 @@ import createHttpError from "http-errors";
 import bookModel from "./bookModel";
 import fs from "node:fs";
 import { AuthRequest } from "../middleware/authenticate";
+import { Book } from "./bookTypes";
 
 const createBook = async (req: Request, res: Response, next: NextFunction) => {
   const { title, genre } = req.body;
@@ -84,6 +85,7 @@ const updateBook = async (req: Request, res: Response, next: NextFunction) => {
   if (book.author.toString() !== _req.userId) {
     return next(createHttpError(403, "you cannot update others book."));
   }
+  deleteExistingcloudinary(book);
   let completeCoverImage = "";
   const files = req.files as {
     [fieldName: string]: Express.Multer.File[];
@@ -144,6 +146,19 @@ const updateBook = async (req: Request, res: Response, next: NextFunction) => {
 
   res.json({ updatedBook });
 };
+const deleteExistingcloudinary = async (book: Book) => {
+  const coverImageSplits = book.coverImage.split("/");
+  const coverImagePublicId =
+    coverImageSplits.at(-2) + "/" + coverImageSplits.at(-1)?.split(".").at(0);
+
+  const filePdfSplit = book.file.split("/");
+  const filePublicId = filePdfSplit.at(-2) + "/" + filePdfSplit.at(-1);
+
+  await cloudinary.uploader.destroy(filePublicId, {
+    resource_type: "raw",
+  });
+  await cloudinary.uploader.destroy(coverImagePublicId);
+};
 const listBooks = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const book = await bookModel.find();
@@ -183,22 +198,7 @@ const deleteBook = async (req: Request, res: Response, next: NextFunction) => {
     if (singleBook.author.toString() !== _req.userId) {
       return next(createHttpError(403, "you cannot delete others book."));
     }
-    const coverImageSplits = singleBook.coverImage.split("/");
-    const coverImagePublicId =
-      coverImageSplits.at(-2) + "/" + coverImageSplits.at(-1)?.split(".").at(0);
-    //console.log(coverImagePublicId);
-    const filePdfSplit = singleBook.file.split("/");
-
-    const filePublicId = filePdfSplit.at(-2) + "/" + filePdfSplit.at(-1);
-    console.log(filePdfSplit);
-
-    console.log(filePublicId);
-
-    await cloudinary.uploader.destroy(filePublicId, {
-      resource_type: "raw",
-    });
-    await cloudinary.uploader.destroy(coverImagePublicId);
-    await bookModel.deleteOne({ _id: bookId });
+    deleteExistingcloudinary(singleBook);
     //res.json({ message: `${bookId} Deleted.` });
     res.sendStatus(204);
   } catch (err) {
