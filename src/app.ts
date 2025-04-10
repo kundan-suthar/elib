@@ -3,8 +3,15 @@ import express, { NextFunction, Request, Response } from "express";
 import globalErrorHandler from "./middleware/globalErrorHandler";
 import userRouter from "./users/userRouter";
 import booksRouter from "./books/booksRouter";
+import cors from "cors";
+import { config } from "./config/config";
 
 const app = express();
+app.use(
+  cors({
+    origin: config.frontendDomain,
+  })
+);
 app.use(express.json());
 // Routes
 app.get("/", (req: Request, res: Response, next: NextFunction) => {
