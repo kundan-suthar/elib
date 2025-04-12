@@ -8,7 +8,12 @@ const bookSchema = new mongoose.Schema<Book>(
       required: true,
     },
     author: {
-      type: mongoose.Schema.ObjectId,
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
+    description: {
+      type: String,
       required: true,
     },
     coverImage: {

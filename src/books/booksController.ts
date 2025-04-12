@@ -8,7 +8,7 @@ import { AuthRequest } from "../middleware/authenticate";
 import { Book } from "./bookTypes";
 
 const createBook = async (req: Request, res: Response, next: NextFunction) => {
-  const { title, genre } = req.body;
+  const { title, genre, description } = req.body;
   //console.log("file:", req.files);
   const files = req.files as {
     [fieldName: string]: Express.Multer.File[];
@@ -55,6 +55,7 @@ const createBook = async (req: Request, res: Response, next: NextFunction) => {
     const newBook = await bookModel.create({
       title,
       genre,
+      description,
       author: _req.userId,
       coverImage: uploadResult.secure_url,
       file: fileUploadResult.secure_url,
@@ -161,7 +162,7 @@ const deleteExistingcloudinary = async (book: Book) => {
 };
 const listBooks = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const book = await bookModel.find();
+    const book = await bookModel.find().populate("author", "name");
     res.json({ book });
   } catch (err) {
     console.log(err);
