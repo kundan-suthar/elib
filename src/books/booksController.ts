@@ -162,8 +162,8 @@ const deleteExistingcloudinary = async (book: Book) => {
 };
 const listBooks = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const book = await bookModel.find().populate("author", "name");
-    res.json({ book });
+    const books = await bookModel.find().populate("author", "name");
+    res.json({ books });
   } catch (err) {
     console.log(err);
     return next(createHttpError(500, "Error while getting books."));
@@ -176,7 +176,9 @@ const getSingleBook = async (
 ) => {
   try {
     const bookId = req.params.bookId;
-    const singleBook = await bookModel.findOne({ _id: bookId });
+    const singleBook = await bookModel
+      .findOne({ _id: bookId })
+      .populate("author", "name");
     if (!singleBook) {
       return next(createHttpError(404, "book not found."));
     }
