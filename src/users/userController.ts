@@ -47,7 +47,7 @@ const createUser = async (req: Request, res: Response, next: NextFunction) => {
     });
     //return
     res.status(201).json({
-      accessToke: token,
+      token: token,
     });
   } catch (error) {
     console.log(error);
@@ -67,7 +67,7 @@ const loginUser = async (req: Request, res: Response, next: NextFunction) => {
     if (!user) {
       return next(createHttpError(404, "User not found"));
     }
-    const isMatch = bcrypt.compare(password, user.password);
+    const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       return next(createHttpError(400, "Username or password incorrect."));
     }
